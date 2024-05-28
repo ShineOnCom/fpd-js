@@ -1,6 +1,6 @@
 {
   "name": "@shineoncom/fpd-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ShineOn version of FPD, supporting a wide-range of products from our own catalog",
   "files": [
     "dist/css",
