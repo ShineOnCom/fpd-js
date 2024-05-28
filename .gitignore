@@ -2,6 +2,7 @@ node_modules
 fpd-js.code-workspace
 demos/_play.html
 demos/_play/
+demos/dev
 **/.DS_Store
 .vscode
 .idea
