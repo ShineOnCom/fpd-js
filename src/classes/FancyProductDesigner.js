@@ -8,7 +8,7 @@ import EditorBox from '../ui/controller/EditorBox.js';
 import tinycolor from "tinycolor2";
 import {initAdvancedCorners} from  '../fabricjs/objects/Controls.js';
 
-import { 
+import {
     addEvents,
     loadGridImage,
     isPlainObject,
@@ -37,11 +37,11 @@ import { loadFonts } from '../helpers/fonts-loader.js';
  * @extends EventTarget
  */
 export default class FancyProductDesigner extends EventTarget {
-    
+
     static version = '6.2.2';
     static forbiddenTextChars = /<|>/g;
     static proxyFileServer = '';
-    static uploadsToServer = true;
+    static uploadsToServer = false;
 
     /**
      * You can register your own modules and add them in this static property.
@@ -54,8 +54,8 @@ export default class FancyProductDesigner extends EventTarget {
      * @memberof FancyProductDesigner
      * @static
      */
-    static additionalModules = {}; 
-        
+    static additionalModules = {};
+
     /**
      * The container for the Fancy Product Designer.
      *
@@ -63,10 +63,10 @@ export default class FancyProductDesigner extends EventTarget {
      * @readonly
      * @default null
      * @memberof FancyProductDesigner
-     * @inner 
+     * @inner
      */
     container = null;
-    
+
     /**
      * The main options set for this Product Designer.
      *
@@ -74,100 +74,100 @@ export default class FancyProductDesigner extends EventTarget {
      * @readonly
      * @default {}
      * @memberof FancyProductDesigner
-     * @inner 
+     * @inner
      */
     mainOptions = {};
-    
+
     /**
      * The current selected view instance.
      *
      * @type {FancyProductDesignerView}
      * @readonly
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     currentViewInstance = null;
-    
+
     /**
      * The current selected view index.
      *
      * @type Number
      * @default 0
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     currentViewIndex = 0;
-    
+
     /**
      * Array containing all products.
      *
      * @type {Array}
      * @readonly
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     products = [];
-    
+
     /**
      * Array containing all designs.
      *
      * @type {Array}
      * @readonly
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     designs = [];
-    
+
     /**
      * The container for internal modals.
      *
      * @type HTMLElement
      * @default document.body
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     modalContainer = document.body;
-    
+
     /**
      * The current selected product category index.
      *
      * @type Number
      * @default 0
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     currentCategoryIndex = 0;
-    
+
     /**
      * The current selected product index.
      *
      * @type Number
      * @default 0
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     currentProductIndex = 0;
-    
+
     /**
      * Array containing all FancyProductDesignerView instances of the current showing product.
      *
      * @type Array
      * @default []
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     viewInstances = [];
-    
+
     /**
      * The initial views of the current product.
      *
      * @type Array
      * @default null
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     productViews = null;
-    
+
     /**
      * The current selected element.
      *
@@ -175,50 +175,50 @@ export default class FancyProductDesigner extends EventTarget {
      * @type fabric.Object
      * @default null
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     currentElement = null;
-    
+
     /**
      * Indicates if the product is created or not.
      *
      * @type Boolean
      * @default false
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     productCreated = false;
-    
+
     /**
      * Object containing all color link groups.
      *
      * @type Object
      * @default {}
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     colorLinkGroups = {};
-    
+
     /**
      * Array with all added custom elements.
      *
      * @type Array
      * @default []
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     globalCustomElements = [];
-    
+
     /**
      * Indicates if the product was saved.
      *
      * @type Boolean
      * @default false
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     doUnsavedAlert = false;
-    
+
     /**
      * The price considering the elements price in all views with order quantity.
      *
@@ -226,10 +226,10 @@ export default class FancyProductDesigner extends EventTarget {
      * @type Number
      * @default 0
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     currentPrice = 0;
-    
+
     /**
      * The price considering the elements price in all views without order quantity.
      *
@@ -237,10 +237,10 @@ export default class FancyProductDesigner extends EventTarget {
      * @type Number
      * @default 0
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     singleProductPrice = 0;
-    
+
     /**
      * The calculated price for the pricing rules.
      *
@@ -248,7 +248,7 @@ export default class FancyProductDesigner extends EventTarget {
      * @type Number
      * @default 0
      * @memberof FancyProductDesigner
-     * @inner      
+     * @inner
      */
     pricingRulesPrice = 0;
 
@@ -296,27 +296,27 @@ export default class FancyProductDesigner extends EventTarget {
 	 * @default null
 	 */
     industryType = null;
-    
+
     loadingCustomImage = false;
     lazyBackgroundObserver = null;
     draggedPlaceholder = null;
     mouseOverCanvas = false;
     firstProductCreated = false;
-    
+
     #totalProductElements = 0;
     #productElementLoadingIndex = 0;
     inTextField = false;
     _order = {};
-    
+
     constructor(elem, opts={}) {
-        
-        super();        
+
+        super();
 
         if(!elem) {
-            console.log("No DOM element found for FPD.");  
+            console.log("No DOM element found for FPD.");
             return;
         }
-    
+
         this.lazyBackgroundObserver = new IntersectionObserver((entries) => {
 
             entries.forEach((entry) => {
@@ -327,7 +327,7 @@ export default class FancyProductDesigner extends EventTarget {
             });
 
         });
-                
+
         this.container = elem;
         this.container.instance = this;
         this.mainOptions = Options.merge(Options.defaults, opts);
@@ -335,16 +335,16 @@ export default class FancyProductDesigner extends EventTarget {
         //lowercase all keys in hexNames
         let newHexNames = {};
         Object.keys(this.mainOptions.hexNames).forEach((hexKey) => {
-            newHexNames[hexKey.toLowerCase()] = this.mainOptions.hexNames[hexKey];            
+            newHexNames[hexKey.toLowerCase()] = this.mainOptions.hexNames[hexKey];
         })
         this.mainOptions.hexNames = newHexNames;
 
         //set rtl or ltr for text elements
-        this.mainOptions.textParameters.direction = window.getComputedStyle(document.body || document.documentElement).direction;     
+        this.mainOptions.textParameters.direction = window.getComputedStyle(document.body || document.documentElement).direction;
         if(this.mainOptions.textParameters.direction == 'rtl') {
             this.mainOptions.textParameters.textAlign = 'right';
-        }   
-        
+        }
+
         if(this.mainOptions.cornerControlsStyle == 'advanced') {
             initAdvancedCorners();
         }
@@ -366,33 +366,33 @@ export default class FancyProductDesigner extends EventTarget {
             )
 
         }
-        
+
         this.translator = new Translator();
         this.translator.loadLangJSON(this.mainOptions.langJSON, this.#langLoaded.bind(this));
-                      
+
     }
-    
+
     #langLoaded() {
 
         loadFonts(this, (fonts) => {
 
             this.mainOptions.fonts = fonts;
-        
+
             //timeout when no language json file is loaded
             setTimeout(() => {
 
                 this.uiManager = new UIManager(this);
-                this.uiManager.addEventListener('ready', this.#ready.bind(this));                
+                this.uiManager.addEventListener('ready', this.#ready.bind(this));
                 this.uiManager.init();
 
             }, 1)
-            
-        })    
-    
+
+        })
+
     }
-    
+
     #ready() {
-        
+
         /**
          * Gets fired as soon as product designer is ready, e.g. to make any method call.
          *
@@ -403,14 +403,14 @@ export default class FancyProductDesigner extends EventTarget {
         })
 
         this.warningsWrapper = this.container.querySelector('.fpd-warnings');
-        
+
         if(this.mainOptions.productsJSON) {
-        
+
             if(typeof this.mainOptions.productsJSON === 'object') {
                 this.setupProducts(this.mainOptions.productsJSON);
             }
             else {
-                
+
                 getJSON({
                     url: this.mainOptions.productsJSON,
                     onSuccess: (data) => {
@@ -418,20 +418,20 @@ export default class FancyProductDesigner extends EventTarget {
                     },
                     onError: () => {
                         alert('Products JSON could not be loaded. Please check that your URL is correct! URL: '+this.mainOptions.productsJSON);
-                    } 
-                });                    
-        
+                    }
+                });
+
             }
-        
+
         }
-        
+
         if(this.mainOptions.designsJSON) {
-            
+
             if(typeof this.mainOptions.designsJSON === 'object') {
                 this.setupDesigns(this.mainOptions.designsJSON);
             }
             else {
-                
+
                 getJSON({
                     url: this.mainOptions.designsJSON,
                     onSuccess: (data) => {
@@ -439,93 +439,93 @@ export default class FancyProductDesigner extends EventTarget {
                     },
                     onError: () => {
                         alert('Design JSON could not be loaded. Please check that your URL is correct! URL: '+this.mainOptions.designsJSON);
-                    } 
+                    }
                 });
 
-            
+
             }
-        
+
         }
-                
+
         if(this.mainOptions.keyboardControl) {
-            
+
             addEvents(
                 document,
                 'keydown',
                 (evt) => {
-                                        
+
                     if(this.currentViewInstance && this.currentViewInstance.fabricCanvas) {
-                        
+
                         const viewInst = this.currentViewInstance;
                         const targetNodename = evt.target.nodeName;
-                        const currentElement = viewInst.fabricCanvas.getActiveObject(); 
-                                                
+                        const currentElement = viewInst.fabricCanvas.getActiveObject();
+
                         if(currentElement && !['TEXTAREA', 'INPUT'].includes(targetNodename)) {
-                        
+
                             switch(evt.which) {
                                 case 8:
                                     //remove element
                                     if(currentElement.removable) {
                                         viewInst.fabricCanvas.removeElement(currentElement);
                                     }
-                        
+
                                 break;
                                 case 37: // left
-                        
+
                                     if(currentElement.draggable) {
                                         viewInst.fabricCanvas.setElementOptions({
                                             left: currentElement.left - 1
                                         });
                                     }
-                        
+
                                 break;
                                 case 38: // up
-                        
+
                                     if(currentElement.draggable) {
                                         viewInst.fabricCanvas.setElementOptions({
                                             top: currentElement.top - 1
                                         });
                                     }
-                        
+
                                 break;
                                 case 39: // right
-                        
+
                                     if(currentElement.draggable) {
                                         viewInst.fabricCanvas.setElementOptions({
                                             left: currentElement.left + 1
                                         });
                                     }
-                        
+
                                 break;
                                 case 40: // down
-                        
+
                                     if(currentElement.draggable) {
                                         viewInst.fabricCanvas.setElementOptions({
                                             top: currentElement.top + 1
                                         });
                                     }
-                        
+
                                 break;
-                        
+
                                 default: return; //other keys
                             }
-                        
+
                             evt.preventDefault();
-                        
+
                         }
-                        
-                    }                    
-                    
+
+                    }
+
                 }
             )
-        
+
         }
 
         //load watermark image
 		if(this.mainOptions.watermark) {
 
 			fabric.Image.fromURL(this.mainOptions.watermark, (fabricImg, error) => {
-                
+
                 if(!error)
 				    this.watermarkImg = fabricImg;
 
@@ -536,7 +536,7 @@ export default class FancyProductDesigner extends EventTarget {
         if(this.mainOptions.unsavedProductAlert) {
 
 			window.onbeforeunload = () => {
-                
+
 				if(this.doUnsavedAlert) {
 					return '';
 				}
@@ -544,7 +544,7 @@ export default class FancyProductDesigner extends EventTarget {
 			};
 
 		}
-        
+
         //window resize handler
         let currentWindowWidth = 0;
         window.addEventListener('resize', (evt) => {
@@ -553,9 +553,9 @@ export default class FancyProductDesigner extends EventTarget {
             if(window.innerWidth === currentWindowWidth || this.inTextField) {
                 return;
             }
-            
+
             currentWindowWidth = window.innerWidth;
-                            
+
             //deselect element if one is selected and active element is not input (FB browser fix)
             if(this.currentElement && !['INPUT', 'TEXTAREA'].includes(document.activeElement)) {
                 this.deselectElement();
@@ -567,7 +567,7 @@ export default class FancyProductDesigner extends EventTarget {
                 setTimeout(() => {
                     this.currentViewInstance.fabricCanvas.resetSize();
                 }, 100);
-                
+
             }
 
         })
@@ -577,7 +577,7 @@ export default class FancyProductDesigner extends EventTarget {
             ['productCreate', 'layoutElementsAdded'],
             this.#addGlobalElements.bind(this)
         )
-        
+
         //window.localStorage.setItem('fpd-gt-closed', 'no');
         addEvents(
             this,
@@ -585,15 +585,15 @@ export default class FancyProductDesigner extends EventTarget {
             (evt) => {
 
                 if((!this.firstProductCreated && !this.mainOptions.modalMode) || (!this.firstProductCreated && evt.type === 'modalDesignerOpen')) {
-                    
+
                     if(this.mainOptions.autoOpenInfo && this.actionsBar) {
 
                         this.actionsBar.doAction('info');
-    
+
                     }
-    
-                    if(this.guidedTour) {                        
-                                                
+
+                    if(this.guidedTour) {
+
                         if(localStorageAvailable()) {
 
                             if(window.localStorage.getItem('fpd-gt-closed') !== 'yes') {
@@ -604,11 +604,11 @@ export default class FancyProductDesigner extends EventTarget {
                         else {
                             this.guidedTour.start();
                         }
-    
+
                     }
-    
+
                 }
-    
+
                 this.firstProductCreated = this.mainOptions.modalMode && evt.type === 'modalDesignerOpen';
 
             }
@@ -618,10 +618,10 @@ export default class FancyProductDesigner extends EventTarget {
             document.body,
             ['focusin', 'blur'],
             (evt) => {
-                
+
                 if(['TEXTAREA', 'INPUT'].includes(evt.target.nodeName)) {
-                    this.inTextField = evt.type == 'focusin'; 
-                }                
+                    this.inTextField = evt.type == 'focusin';
+                }
 
             },
             true
@@ -631,13 +631,13 @@ export default class FancyProductDesigner extends EventTarget {
             document.body,
             ['mouseup', 'touchend'],
             (evt) => {
-                
+
                 let fpdContainers = Array.from(document.querySelectorAll('.fpd-container'));
                 const clickedWithinContainer = Boolean(fpdContainers.find((container) => container.contains(evt.target)));
-                
+
                 //deselect element if click outside of a fpd-container
                 if(!clickedWithinContainer && this.mainOptions.deselectActiveOnOutside) {
-                    
+
                     this.deselectElement();
 
                 }
@@ -648,26 +648,26 @@ export default class FancyProductDesigner extends EventTarget {
 
         //dragging image/design to canvas or upload zone
         if(this.mainOptions.dragDropImagesToUploadZones) {
-            
+
             let targetGridItem = null;
             addEvents(
                 document.body,
                 ['mousedown', 'touchstart'],
                 (evt) => {
-                    
-                    //only left mouse 
+
+                    //only left mouse
                     if(evt.which == 1) {
-                        
+
                         const target = evt.target;
                         if(target.classList.contains('fpd-draggable')) {
-                            
+
                             targetGridItem = target;
 
                             this.draggedPlaceholder = document.createElement('div');
                             this.draggedPlaceholder.className = 'fpd-dragged-image fpd-shadow-1 fpd-hidden';
                             this.draggedPlaceholder.style.backgroundImage = `url("${target.querySelector('picture').dataset.img}")`;
                             document.body.append(this.draggedPlaceholder);
-                            
+
                         }
 
                     }
@@ -681,7 +681,7 @@ export default class FancyProductDesigner extends EventTarget {
                 (evt) => {
 
                     if(this.draggedPlaceholder) {
-                        
+
                         this.draggedPlaceholder.style.left = (evt.pageX - targetGridItem.offsetWidth * 0.5)+'px';
                         this.draggedPlaceholder.style.top = (evt.pageY - targetGridItem.offsetHeight * 0.5)+'px';
 
@@ -708,24 +708,24 @@ export default class FancyProductDesigner extends EventTarget {
             addEvents(
                 document.body,
                 ['mouseup'],
-                (evt) => {    
-                    
+                (evt) => {
+
                     if(this.draggedPlaceholder) {
 
                         this.draggedPlaceholder.remove();
                         this.draggedPlaceholder = null;
 
-                    }                    
-                                        
+                    }
+
                     if(!this.loadingCustomImage && targetGridItem && this.mouseOverCanvas) {
-                        
+
                         this._addGridItemToCanvas(
                             targetGridItem,
                             this.mouseOverCanvas.uploadZone ? {_addToUZ: this.mouseOverCanvas.title} : {}
                         );
-        
+
                     }
-        
+
                     targetGridItem = null;
                     this.mouseOverCanvas = false;
 
@@ -737,7 +737,7 @@ export default class FancyProductDesigner extends EventTarget {
         if(typeof this.mainOptions.editorMode === 'string') {
             new EditorBox(this);
         }
-            
+
     }
 
     #addGlobalElements() {
@@ -747,7 +747,7 @@ export default class FancyProductDesigner extends EventTarget {
 
         let globalElementsCount = 0;
         const _addCustomElement = (object) => {
-            
+
             const viewInstance = this.viewInstances[object.viewIndex];
 
             if(viewInstance) { //add element to correct view
@@ -771,7 +771,7 @@ export default class FancyProductDesigner extends EventTarget {
                     if(elementProps._printingBox) {
                         delete elementProps.boundingBox;
                     }
-                    
+
                     viewInstance.fabricCanvas.addElement(
                         fpdElement.getType(),
                         fpdElement.source,
@@ -805,39 +805,39 @@ export default class FancyProductDesigner extends EventTarget {
             'elementAdd',
             _customElementAdded
         )
-                
+
         if(globalElements[0])
             _addCustomElement(globalElements[0]);
 
     }
-    
+
     //get category index by category name
     #getCategoryIndexInProducts(catName) {
-        
+
         var catIndex = this.products.findIndex(obj => obj.category === catName);
         return catIndex === -1 ? false : catIndex;
-    
+
     };
-    
+
     setupProducts(products=[]) {
-                        
+
         this.products = [];
-        
+
         products.forEach((productItem) => {
-        
+
             if(productItem.hasOwnProperty('category')) { //check if products JSON contains categories
-        
+
                 productItem.products.forEach((singleProduct) => {
                     this.addProduct(singleProduct, productItem.category);
                 });
-        
+
             }
             else {
                 this.addProduct(productItem);
             }
-        
+
         });
-        
+
         //load first product
         if(this.mainOptions.loadFirstProductInStage && products.length > 0) {
             this.selectProduct(0);
@@ -845,7 +845,7 @@ export default class FancyProductDesigner extends EventTarget {
         else {
             this.toggleSpinner(false);
         }
-        
+
         /**
          * Gets fired as soon as products are set.
          *
@@ -854,9 +854,9 @@ export default class FancyProductDesigner extends EventTarget {
          */
         fireEvent(this, 'productsSet', {
         })
-        
+
     }
-    
+
     /**
      * Set up the designs with a JSON.
      *
@@ -865,8 +865,8 @@ export default class FancyProductDesigner extends EventTarget {
      */
     setupDesigns(designs) {
 
-        this.designs = designs;        
-                
+        this.designs = designs;
+
         /**
          * Gets fired as soon as the designs are set.
          *
@@ -876,7 +876,7 @@ export default class FancyProductDesigner extends EventTarget {
         fireEvent(this, 'designsSet', {})
 
     };
-    
+
     /**
      * Adds a new product to the product designer.
      *
@@ -885,25 +885,25 @@ export default class FancyProductDesigner extends EventTarget {
      * @param {string} [category] If categories are used, you need to define the category title.
      */
     addProduct(views, category) {
-        
+
         var catIndex = this.#getCategoryIndexInProducts(category);
-        
+
         if(category === undefined) {
             this.products.push(views);
         }
         else {
-        
+
             if(catIndex === false) {
-        
+
                 catIndex = this.products.length;
                 this.products[catIndex] = {category: category, products: []};
-        
+
             }
-        
+
             this.products[catIndex].products.push(views);
-        
+
         }
-        
+
         /**
          * Gets fired when a product is added.
          *
@@ -918,42 +918,42 @@ export default class FancyProductDesigner extends EventTarget {
             category: category,
             catIndex: catIndex
         })
-        
+
     }
-    
+
     selectProduct(index, categoryIndex) {
-        
+
         this.#totalProductElements = this.#productElementLoadingIndex = 0;
         this.currentCategoryIndex = categoryIndex === undefined ? this.currentCategoryIndex : categoryIndex;
-        
+
         let productsObj;
-        if(this.products && this.products.length && this.products[0].category) { 
+        if(this.products && this.products.length && this.products[0].category) {
             //categories enabled
             const category = this.products[this.currentCategoryIndex];
             productsObj = category.products;
         }
-        else { 
+        else {
             //no categories enabled
             productsObj = this.products;
         }
-        
+
         this.currentProductIndex = index;
-        if(index < 0) { 
-            this.currentProductIndex = 0; 
+        if(index < 0) {
+            this.currentProductIndex = 0;
         }
-        else if(index > productsObj.length-1) { 
-            this.currentProductIndex = productsObj.length-1; 
+        else if(index > productsObj.length-1) {
+            this.currentProductIndex = productsObj.length-1;
         }
-        
+
         const product = productsObj[this.currentProductIndex];
-        
+
         this.loadProduct(
-            product, 
+            product,
             this.mainOptions.replaceInitialElements
         );
-                
+
     }
-    
+
     /**
      * Loads a new product to the product designer.
      *
@@ -963,7 +963,7 @@ export default class FancyProductDesigner extends EventTarget {
      * @param {Boolean} [mergeMainOptions=false] Merges the main options into every view options.
      */
     loadProduct(views, replaceInitialElements=false, mergeMainOptions=false) {
-        
+
         if(!views) { return; }
 
         /**
@@ -976,13 +976,13 @@ export default class FancyProductDesigner extends EventTarget {
         fireEvent(this, 'productSelect', {
             product: views
         })
-        
+
         this.toggleSpinner(true);
-        
+
         //reset when loading a product
         this.productCreated = false;
         this.colorLinkGroups = {};
-    
+
         this.globalCustomElements = [];
         if(replaceInitialElements) {
             this.globalCustomElements = this.getCustomElements();
@@ -990,9 +990,9 @@ export default class FancyProductDesigner extends EventTarget {
         else {
             this.doUnsavedAlert = false;
         }
-    
+
         this.fixedElements = this.getFixedElements();
-    
+
         this.reset();
 
         views.forEach((view, i) => {
@@ -1000,7 +1000,7 @@ export default class FancyProductDesigner extends EventTarget {
             if(mergeMainOptions) {
                 view.options = Options.merge(this.mainOptions, view.options);
             }
-            
+
             const relevantOptions = {};
 
             if(isPlainObject(view.options)) {
@@ -1010,35 +1010,35 @@ export default class FancyProductDesigner extends EventTarget {
                     if(typeof view.options[key] !== 'undefined') {
                         relevantOptions[key] = view.options[key];
                     }
-                    
+
                 });
-                
+
             }
-            
+
 
             view.options = relevantOptions;
 
         });
 
         this.productViews = views;
-    
+
         this.#totalProductElements = this.#productElementLoadingIndex = 0;
-        views.forEach((view, i) => {            
+        views.forEach((view, i) => {
             this.#totalProductElements += view.elements.length;
-        });        
-    
+        });
+
         addEvents(
             this,
             'viewCreate',
             this.#onViewCreated
         )
-    
+
         if(views) {
             this.addView(views[0]);
         }
-    
+
     }
-    
+
     /**
      * Adds a view to the current visible product.
      *
@@ -1046,44 +1046,44 @@ export default class FancyProductDesigner extends EventTarget {
      * @param {object} view An object with title, thumbnail and elements properties.
      */
     addView(view) {
-    
+
         //get relevant view options
         let relevantMainOptions = {};
         FancyProductDesignerView.relevantOptions.forEach((key) => {
-            
+
             let mainProp = this.mainOptions[key];
             relevantMainOptions[key] = isPlainObject(mainProp) ? {...mainProp} : mainProp;
-            
+
         })
-            
+
         view.options = isPlainObject(view.options) ? deepMerge(relevantMainOptions, view.options) : relevantMainOptions;
 
-        //first view containing also product options        
+        //first view containing also product options
         document.body.dataset.fpdIndustryType = '';
         this.industryType = null;
         if(this.viewInstances.length == 0 && view.options.industry && view.options.industry.type) {
 
             this.industryType = view.options.industry.type;
             document.body.dataset.fpdIndustryType = this.industryType;
-            
+
         }
-                
+
         let viewInstance = new FancyProductDesignerView(
-            this.productStage, 
-            view, 
-            this.#viewStageAdded.bind(this), 
-            this.mainOptions.fabricCanvasOptions 
+            this.productStage,
+            view,
+            this.#viewStageAdded.bind(this),
+            this.mainOptions.fabricCanvasOptions
         );
-        
+
         viewInstance.fabricCanvas.on({
             'mouse:move': (opts) => {
 
-                this.mouseOverCanvas = opts.target ? opts.target : true;                                
+                this.mouseOverCanvas = opts.target ? opts.target : true;
 
             },
             'mouse:out': (opts) => {
 
-                this.mouseOverCanvas = false;                                
+                this.mouseOverCanvas = false;
 
             },
             'beforeElementAdd': (opts) => {
@@ -1097,8 +1097,8 @@ export default class FancyProductDesigner extends EventTarget {
                 if(!this.productCreated) {
 
                     this.#productElementLoadingIndex++;
-                            
-                    const txt = opts.title + '<br>' + String(this.#productElementLoadingIndex) + '/' + this.#totalProductElements;                    
+
+                    const txt = opts.title + '<br>' + String(this.#productElementLoadingIndex) + '/' + this.#totalProductElements;
                     this.mainLoader.querySelector('.fpd-loader-text').innerHTML = txt;
 
                 }
@@ -1113,98 +1113,98 @@ export default class FancyProductDesigner extends EventTarget {
                 fireEvent(this, 'beforeElementAdd', {
                     element: opts
                 })
-                
+
             },
             'elementAdd': ({element}) => {
-                
+
                 if(!element) {
 
                     this.toggleSpinner(false);
                     return;
 
                 }
-                
+
                 if(this.productCreated && element.getType() == 'image' && element.isCustom) {
 
                     this.toggleSpinner(false);
                 }
 
 
-                //element should be replaced in all views                                              
+                //element should be replaced in all views
                 if(!this.mainOptions.editorMode && element.replace && element.replaceInAllViews) {
 
                     this.viewInstances.forEach((viewInst, i) => {
 
                         if(this.currentViewIndex != i) {
-                        
+
                             const replacedElem = viewInst.fabricCanvas.getElementByReplace(element.replace);
-                                                        
+
                             if(replacedElem && !element._replaceAdded) {
 
                                 viewInst.fabricCanvas.addElement(
-                                    element.getType(), 
-                                    element.source, 
-                                    element.title, 
+                                    element.getType(),
+                                    element.source,
+                                    element.title,
                                     {...element.originParams, _replaceAdded: true}
                                 );
 
                             }
-                                
+
                         }
-                        
+
 
                     })
 
                 }
-    
+
                 //check if element has a color linking group
                 if(element.colorLinkGroup && element.colorLinkGroup.length > 0 && !this.mainOptions.editorMode) {
-                                        
+
                     var viewIndex = this.getViewIndexByWrapper(viewInstance.fabricCanvas.wrapperEl);
-                                        
+
                     if(this.colorLinkGroups.hasOwnProperty(element.colorLinkGroup)) { //check if color link object exists for the link group
-        
+
                         //add new element with id and view index of it
                         this.colorLinkGroups[element.colorLinkGroup].elements.push({id: element.id, viewIndex: viewIndex});
-        
+
                         if(typeof element.colors === 'object') {
-        
+
                             //create color group colors
-                            const colorGroupColors = this.mainOptions.replaceColorsInColorGroup ? element.colors : this.colorLinkGroups[element.colorLinkGroup].colors.concat(element.colors);                            
+                            const colorGroupColors = this.mainOptions.replaceColorsInColorGroup ? element.colors : this.colorLinkGroups[element.colorLinkGroup].colors.concat(element.colors);
                             this.colorLinkGroups[element.colorLinkGroup].colors = arrayUnique(colorGroupColors);
-        
+
                         }
                         else if(element.colors === 1 || element.colors === true) {
-        
+
                             this.colorLinkGroups[element.colorLinkGroup].colors = ['#000'];
-        
+
                         }
-        
+
                     }
                     else {
-        
+
                         //create initial color link object
                         this.colorLinkGroups[element.colorLinkGroup] = {elements: [{id:element.id, viewIndex: viewIndex}], colors: []};
-        
+
                         if(typeof element.colors === 'object') {
-        
+
                             this.colorLinkGroups[element.colorLinkGroup].colors = element.colors;
-        
+
                         }
                         else if(element.colors === 1 || element.colors === true) {
-        
+
                             this.colorLinkGroups[element.colorLinkGroup].colors = ['#000'];
-        
+
                         }
-        
+
                     }
-        
+
                 }
 
                 if(this.productCreated && this.mainOptions.hideDialogOnAdd && this.mainBar) {
                     this.mainBar.toggleContentDisplay(false);
                 }
-                
+
                 /**
                  * Gets fired when an element is added.
                  *
@@ -1219,7 +1219,7 @@ export default class FancyProductDesigner extends EventTarget {
                 fireEvent(this, 'viewCanvasUpdate', {
                     viewInstance: viewInstance
                 })
-                
+
             },
             'elementRemove': ({element}) => {
 
@@ -1227,7 +1227,7 @@ export default class FancyProductDesigner extends EventTarget {
                 const deleteIndex = this.fixedElements.findIndex((item) => {
                     return item.element.title == element.title
                 })
-        
+
                 if(deleteIndex != -1) {
                     this.fixedElements.splice(deleteIndex, 1);
                 }
@@ -1246,20 +1246,20 @@ export default class FancyProductDesigner extends EventTarget {
                 fireEvent(this, 'viewCanvasUpdate', {
                     viewInstance: viewInstance
                 })
-                
+
 
             },
             'elementSelect': ({element}) => {
-                
+
                 this.currentElement = element;
-                
+
                 this.#updateElementTooltip();
-                
+
                 if(element && !element._ignore && this.currentViewInstance) {
 
                     //upload zone is selected
                     if(element.uploadZone && !this.mainOptions.editorMode) {
-                        
+
                         let customAdds = deepMerge(
                             this.currentViewInstance.options.customAdds,
                             element.customAdds || {}
@@ -1279,7 +1279,7 @@ export default class FancyProductDesigner extends EventTarget {
                         this.mainBar.toggleUploadZonePanel(false);
 
                     }
-                    
+
 
                 }
 
@@ -1291,15 +1291,15 @@ export default class FancyProductDesigner extends EventTarget {
                  */
                 fireEvent(this, 'elementSelect', {})
 
-                if(this.mainOptions.openTextInputOnSelect 
+                if(this.mainOptions.openTextInputOnSelect
                     && element
-                    && element.getType() === 'text' 
+                    && element.getType() === 'text'
                     && element.editable
                     && this.toolbar
                 ) {
-                    
+
                     this.toolbar.container.querySelector('.fpd-tool-edit-text').click();
-                    
+
                 }
 
                 this.#setWarnings();
@@ -1320,27 +1320,27 @@ export default class FancyProductDesigner extends EventTarget {
             'elementCheckContainemt': ({target, boundingBoxMode}) => {
 
                 if(boundingBoxMode === 'inside') {
-        
+
                     this.#updateElementTooltip();
-        
+
                 }
 
             },
-            'elementFillChange': ({element, colorLinking}) => {                
-                                
+            'elementFillChange': ({element, colorLinking}) => {
+
                 if(this.productCreated && colorLinking && element.colorLinkGroup && element.colorLinkGroup.length > 0) {
-        
-                    const group = this.colorLinkGroups[element.colorLinkGroup];                    
+
+                    const group = this.colorLinkGroups[element.colorLinkGroup];
 
                     if(group && group.elements) {
 
                         group.elements.forEach((groupElem) => {
-                                                        
+
                             if(element.id != groupElem.id) {
 
                                 const targetView = this.viewInstances[groupElem.viewIndex];
                                 const targetElem = targetView.fabricCanvas.getElementByID(groupElem.id);
-                                
+
                                 if(targetElem)
                                     targetElem.changeColor(element.fill, false);
 
@@ -1349,7 +1349,7 @@ export default class FancyProductDesigner extends EventTarget {
                         })
 
                     }
-        
+
                 }
 
                 /**
@@ -1360,7 +1360,7 @@ export default class FancyProductDesigner extends EventTarget {
                  * @param {fabric.Object} element
                  * @param {String} hex Hexadecimal color string.
                  * @param {Boolean} colorLinking Color of element is linked to other colors.
-                 */                
+                 */
                 fireEvent(this, 'elementFillChange', {
                     element: element,
                     colorLinking: colorLinking
@@ -1368,18 +1368,18 @@ export default class FancyProductDesigner extends EventTarget {
 
                 fireEvent(this, 'viewCanvasUpdate', {
                     viewInstance: viewInstance
-                })   
-                
+                })
+
                 this.applyTextLinkGroup(element, {fill: element.fill});
-            
+
             },
             'elementChange': ({element, type}) => {
 
                 this.#updateElementTooltip();
-                
+
                 if(type === 'scaling') {
                     this.#setWarnings(element);
-                }                
+                }
 
                 fireEvent(this, 'elementChange', {
                     type: type,
@@ -1388,11 +1388,11 @@ export default class FancyProductDesigner extends EventTarget {
 
             },
             'elementModify': ({element, options}) => {
-                
+
                 this.#updateElementTooltip();
                 this.applyTextLinkGroup(element, options);
                 this.#setWarnings(element);
-                
+
                 /**
                  * Gets fired when an element is modified.
                  *
@@ -1404,7 +1404,7 @@ export default class FancyProductDesigner extends EventTarget {
                 fireEvent(this, 'elementModify', {
                     options: options,
                     element: element
-                })                
+                })
 
                 fireEvent(this, 'viewCanvasUpdate', {
                     viewInstance: viewInstance
@@ -1413,7 +1413,7 @@ export default class FancyProductDesigner extends EventTarget {
             },
             'text:changed': ({target}) => {
 
-                this.applyTextLinkGroup(target, {text: target.text});         
+                this.applyTextLinkGroup(target, {text: target.text});
 
             },
             'history:append': () => { this.#historyAction('append') },
@@ -1428,40 +1428,40 @@ export default class FancyProductDesigner extends EventTarget {
             (evt) => {
 
                 this.calculatePrice();
-                
+
             }
         )
-    
+
         viewInstance.init();
-    
+
     }
 
     #onViewCreated() {
-            
+
         //add all views of product till views end is reached
         if(this.viewInstances.length < this.productViews.length) {
-    
+
             this.addView(this.productViews[this.viewInstances.length]);
-    
+
         }
         //all views added
         else {
 
             this.removeEventListener('viewCreate', this.#onViewCreated);
-    
-            this.toggleSpinner(false);            
+
+            this.toggleSpinner(false);
             this.selectView(0);
-            
+
             //select element with autoSelect enabled
-            if(!this.mainOptions.editorMode 
-                && this.currentViewInstance 
+            if(!this.mainOptions.editorMode
+                && this.currentViewInstance
                 && this.currentViewInstance.fabricCanvas.wrapperEl.offsetParent //canvas is visible
             ) {
 
                 this.doAutoSelect();
 
             }
-    
+
             this.productCreated = true;
 
             const productLayouts = this.productViews[0].options.layouts;
@@ -1471,17 +1471,17 @@ export default class FancyProductDesigner extends EventTarget {
                 getJSON({
                     url: productLayouts,
                     onSuccess: (data) => {
-    
+
                         this.currentLayouts = data;
                         fireEvent(this, 'layoutsSet', {
                         })
-    
+
                     },
                     onError: () => {
                         alert('Layouts JSON could not be loaded. Please check that your URL is correct! URL: '+this.mainOptions.layouts);
-                    } 
-                });  
-    
+                    }
+                });
+
             }
             else if(Array.isArray(productLayouts)) {
 
@@ -1490,7 +1490,7 @@ export default class FancyProductDesigner extends EventTarget {
                 })
 
             }
-                        
+
             /**
              * Gets fired as soon as a product has been fully added to the designer.
              *
@@ -1498,13 +1498,13 @@ export default class FancyProductDesigner extends EventTarget {
              * @param {Event} event
              */
             fireEvent(this, 'productCreate')
-    
+
         }
-    
+
     }
 
     #historyAction(type) {
-        
+
         if(['undo', 'redo'].includes(type)) {
 
             this.currentViewInstance.fabricCanvas._renderPrintingBox();
@@ -1523,18 +1523,18 @@ export default class FancyProductDesigner extends EventTarget {
 
     }
 
-    #toggleUndoRedoBtns() {   
+    #toggleUndoRedoBtns() {
 
         if(this.currentViewInstance) {
-            
+
             const historyUndo = this.currentViewInstance.fabricCanvas.historyUndo;
             const historyRedo = this.currentViewInstance.fabricCanvas.historyRedo;
 
             if(historyUndo.length)
                 this.doUnsavedAlert = true;
-                
+
             if(historyUndo) {
-                                
+
                 toggleElemClasses(
                     document.body.querySelectorAll('.fpd-btn[data-action="undo"]'),
                     ['fpd-disabled'],
@@ -1560,7 +1560,7 @@ export default class FancyProductDesigner extends EventTarget {
         let selectElement = null;
         const viewElements = this.currentViewInstance.fabricCanvas.getObjects();
         viewElements.forEach((obj) => {
-            
+
             if(obj.autoSelect && !obj.hasUploadZone) {
                 selectElement = obj;
             }
@@ -1577,22 +1577,22 @@ export default class FancyProductDesigner extends EventTarget {
         }
 
     }
-    
+
     #viewStageAdded(viewInstance) {
-        
+
         //do not add view instance, if wrapper is not in dom, e.g. has been removed
         if(!viewInstance.fabricCanvas.wrapperEl.parentNode) return;
-        
+
         this.viewInstances.push(viewInstance);
-        
+
         viewInstance.fabricCanvas.on(
             'sizeUpdate',
             ({canvasHeight}) => {
-                
+
                 let mainHeight = canvasHeight+'px';
 
                 this.productStage.style.height = mainHeight;
-                
+
                 const mainBarClasslist = this.container.classList;
                 if(mainBarClasslist.contains('fpd-sidebar')) {
 
@@ -1602,15 +1602,15 @@ export default class FancyProductDesigner extends EventTarget {
                     if(canvasHeight != this.mainWrapper.container.offsetHeight)
                         this.mainBar.container.style.height = this.mainWrapper.container.offsetHeight+'px';
 
-                }                
-                
+                }
+
             }
         )
-        
+
         if(viewInstance.names_numbers && viewInstance.names_numbers.length > 1) {
             viewInstance.changePrice((viewInstance.names_numbers.length-1) * viewInstance.options.namesNumbersEntryPrice, '+');
         }
-        
+
         /**
          * Gets fired when a view is created.
          *
@@ -1619,10 +1619,10 @@ export default class FancyProductDesigner extends EventTarget {
          * @param {FancyProductDesignerView} viewInstance
          */
         fireEvent(this, 'viewCreate', {viewInstance: viewInstance})
-                
+
         viewInstance.fabricCanvas.onHistory();
         viewInstance.fabricCanvas.clearHistory();
-        
+
     }
 
     #updateElementTooltip() {
@@ -1630,19 +1630,19 @@ export default class FancyProductDesigner extends EventTarget {
         if(!this.mainTooltip) return;
 
 		const element = this.currentElement;
-        
+
 		if(this.productCreated && element && !element.uploadZone && !element.__editorMode) {
-            
+
             if(element.isOut && element.boundingBoxMode === 'inside') {
-                
+
                 const label = this.translator.getTranslation('misc', 'out_of_bounding_box', 'Move element inside the boundary!');
                 this.mainTooltip.innerHTML = label;
                 this.mainTooltip.classList.add('fpd-show');
 
 			}
-			else if(this.mainOptions.sizeTooltip) { 
-                
-                const displaySize = this.calcDisplaySize(element);                
+			else if(this.mainOptions.sizeTooltip) {
+
+                const displaySize = this.calcDisplaySize(element);
 			    let displayText = displaySize.width +'x'+ displaySize.height + displaySize.unit;
 
                 if(displaySize.dpi) {
@@ -1660,13 +1660,13 @@ export default class FancyProductDesigner extends EventTarget {
 			}
 
             if(this.mainTooltip.classList.contains('fpd-show')) {
-                
+
                 const oCoords = element.oCoords;
-                const viewStageRect = this.currentViewInstance.fabricCanvas.wrapperEl.getBoundingClientRect();                
-                
+                const viewStageRect = this.currentViewInstance.fabricCanvas.wrapperEl.getBoundingClientRect();
+
                 let leftPos = (viewStageRect.left + oCoords.mt.x - this.mainTooltip.clientWidth / 2);
                 let topPos = (viewStageRect.top + oCoords.mt.y - this.mainTooltip.clientHeight - 20);
-                
+
                 const contRect = this.container.getBoundingClientRect();
                 if(topPos < contRect.top)
                     topPos = contRect.top - this.mainTooltip.clientHeight;
@@ -1696,15 +1696,15 @@ export default class FancyProductDesigner extends EventTarget {
 
         if(this.productCreated && element) {
 
-            const dpi = this.calcElementDPI(element);            
-                        
+            const dpi = this.calcElementDPI(element);
+
             if(element.isCustomImage && dpi !== null && dpi < this.mainOptions.customImageParameters.minDPI) {
 
                 const sizeWarning = document.createElement('div');
                 sizeWarning.className = 'fpd-size-warning';
                 sizeWarning.innerHTML = '<span>'+this.translator.getTranslation('misc', 'dpi_warning', 'Low resolution!')+'</span>';
                 this.warningsWrapper.append(sizeWarning);
-                
+
                 if(this.mainOptions.aiService.serverURL && this.mainOptions.aiService.superRes) {
 
                     const superResBtn = document.createElement('span');
@@ -1717,12 +1717,12 @@ export default class FancyProductDesigner extends EventTarget {
                         const displaySize = this.calcDisplaySize(element);
                         const lin = displaySize.unit == 'mm' ? 25.4 : 2.54;
                         const toPx = parseInt( (this.mainOptions.customImageParameters.minDPI * displaySize.width) / lin );
-                        
+
                         let scaleTo = toPx / element.width;
                         scaleTo = Math.ceil(scaleTo);
                         scaleTo = scaleTo > 4 ? 4 : scaleTo;
                         console.log("AI SuperRes - Scale:", scaleTo);
-                        
+
                         this.deselectElement();
                         this.toggleSpinner(true, this.translator.getTranslation('misc', 'loading_image'));
 
@@ -1734,15 +1734,15 @@ export default class FancyProductDesigner extends EventTarget {
                                 scale: scaleTo
                             },
                             onSuccess: (data) => {
-                                        
+
                                 if(data && data.new_image) {
-                                    
+
                                     let tempScaledWidth = element.getScaledWidth();
-                                    
+
                                     element.setSrc(data.new_image, () => {
 
                                         element.source = data.new_image;
-                                        
+
                                         //fix: two times
                                         element.scaleToWidth(tempScaledWidth);
                                         element.scaleToWidth(tempScaledWidth);
@@ -1754,22 +1754,22 @@ export default class FancyProductDesigner extends EventTarget {
                                             options: {scaleX: element.scaleX},
                                             element: element
                                         })
-                                        
+
                                     }, {crossOrigin: 'anonymous'})
                                 }
                                 else {
-                
+
                                     this.aiRequestError(data.error);
-                    
+
                                 }
 
                                 this.toggleSpinner(false);
-                
-                                
+
+
                             },
                             onError: this.aiRequestError.bind(this)
                         })
-                        
+
                     })
 
                 }
@@ -1779,12 +1779,12 @@ export default class FancyProductDesigner extends EventTarget {
                  *
                  * @event imageDPIWarningOn
                  * @param {Event} event
-                 */        
+                 */
                 fireEvent(this, 'imageDPIWarningOn', {
                     element: element,
                     dpi: dpi
                 })
-                
+
             }
             else {
 
@@ -1793,7 +1793,7 @@ export default class FancyProductDesigner extends EventTarget {
                  *
                  * @event imageDPIWarningOff
                  * @param {Event} event
-                 */        
+                 */
                 fireEvent(this, 'imageDPIWarningOff', {
                     element: element,
                     dpi: dpi
@@ -1814,11 +1814,11 @@ export default class FancyProductDesigner extends EventTarget {
 
     calcElementDPI(element) {
 
-        if( element 
+        if( element
             && !element.uploadZone
             && element.isBitmap()
             && objectHasKeys(this.currentViewInstance.options.output, ['width','height'])
-            && objectHasKeys(this.currentViewInstance.options.printingBox, ['left','top','width','height']) 
+            && objectHasKeys(this.currentViewInstance.options.printingBox, ['left','top','width','height'])
         ) {
 
             const dpi = Math.ceil(((this.currentViewInstance.options.printingBox.width * 25.4) / this.currentViewInstance.options.output.width) / element.scaleX);
@@ -1837,8 +1837,8 @@ export default class FancyProductDesigner extends EventTarget {
         let widthRatio = 1;
         let heightRatio = 1;
         let dpi = null;
-                    
-        if(objectHasKeys(this.currentViewInstance.options.printingBox, ['left','top','width','height']) 
+
+        if(objectHasKeys(this.currentViewInstance.options.printingBox, ['left','top','width','height'])
             && objectHasKeys(this.currentViewInstance.options.output, ['width','height'])
         ) {
 
@@ -1846,7 +1846,7 @@ export default class FancyProductDesigner extends EventTarget {
 
             if(unit != 'px' ) {
 
-                //one pixel in mm                    
+                //one pixel in mm
                 widthRatio = this.currentViewInstance.options.output.width / this.currentViewInstance.options.printingBox.width;
                 heightRatio = this.currentViewInstance.options.output.height / this.currentViewInstance.options.printingBox.height;
 
@@ -1860,7 +1860,7 @@ export default class FancyProductDesigner extends EventTarget {
 
         let sizeWidth = parseInt((element.width * element.scaleX) * widthRatio);
         sizeWidth = parseInt(sizeWidth / unitFactor);
-        
+
         let sizeHeight = parseInt((element.height * element.scaleY) * heightRatio);
         sizeHeight = parseInt(sizeHeight / unitFactor);
 
@@ -1877,7 +1877,7 @@ export default class FancyProductDesigner extends EventTarget {
 
         if(!element) return;
 
-        //text link group                
+        //text link group
         if(!isEmpty(element.textLinkGroup)) {
 
             const textLinkGroupProps = this.mainOptions.textLinkGroupProps || [];
@@ -1886,11 +1886,11 @@ export default class FancyProductDesigner extends EventTarget {
 
                 viewInst.fabricCanvas.getObjects().forEach(fabricObj => {
 
-                    if(fabricObj !== element 
-                        && fabricObj.getType() === 'text' 
+                    if(fabricObj !== element
+                        && fabricObj.getType() === 'text'
                         && fabricObj.textLinkGroup === element.textLinkGroup
                     ) {
-                                                
+
                         if(typeof options.text === 'string') {
 
                             fabricObj.set('text', element.text);
@@ -1903,15 +1903,15 @@ export default class FancyProductDesigner extends EventTarget {
                                 }
                             })
                         }
-                            
 
-                        //get all property keys that are in textLinkGroupProps option                        
+
+                        //get all property keys that are in textLinkGroupProps option
                         const linkedPropKeys = Object.keys(element).filter(key => textLinkGroupProps.includes(key));
                         //copy linked props to other text elements
                         linkedPropKeys.forEach(propKey => {
-                            
+
                             fabricObj.set(propKey, element[propKey]);
-                            
+
                             fireEvent(this, 'textLinkApply', {
                                 element: fabricObj,
                                 options: {
@@ -1919,16 +1919,16 @@ export default class FancyProductDesigner extends EventTarget {
                                 }
                             })
                         })
-                        
+
                         viewInst.fabricCanvas.renderAll();
-     
+
                     }
 
                 })
 
             })
 
-        }   
+        }
 
     }
 
@@ -1943,18 +1943,18 @@ export default class FancyProductDesigner extends EventTarget {
         return Array.from(this.productStage.querySelectorAll('.fpd-view-stage')).indexOf(wrapperEl);
 
 	}
-    
+
     toggleSpinner(toggle=true, msg='') {
 
         if(!this.mainLoader) return false;
-        
+
         this.mainLoader.querySelector('.fpd-loader-text').innerText = msg;
         this.mainLoader.classList.toggle('fpd-hidden', !toggle);
 
-        return this.mainLoader; 
-        
+        return this.mainLoader;
+
     }
-    
+
     /**
      * Selects a view from the current visible views.
      *
@@ -1962,35 +1962,35 @@ export default class FancyProductDesigner extends EventTarget {
      * @param {number} index The requested view by an index value. 0 will load the first view.
      */
     selectView(index=0) {
-                
+
         if(this.viewInstances.length <= 0) {return;}
-        
+
         if(this.currentViewInstance && this.currentViewInstance.fabricCanvas)
             this.currentViewInstance.fabricCanvas.resetZoom();
-        
+
         this.currentViewIndex = index;
-        if(index < 0) { 
-            this.currentViewIndex = 0; 
+        if(index < 0) {
+            this.currentViewIndex = 0;
         }
-        else if(index > this.viewInstances.length-1) { 
-            this.currentViewIndex = this.viewInstances.length-1; 
-        }                
-        
-        if(this.currentViewInstance && this.currentViewInstance.fabricCanvas)    
+        else if(index > this.viewInstances.length-1) {
+            this.currentViewIndex = this.viewInstances.length-1;
+        }
+
+        if(this.currentViewInstance && this.currentViewInstance.fabricCanvas)
             this.currentViewInstance.fabricCanvas.clearHistory();
-        
-        
+
+
         this.currentViewInstance = this.viewInstances[this.currentViewIndex];
-        
+
         this.deselectElement();
-        
+
         //select view wrapper and render stage of view
         const viewStages = this.productStage.querySelectorAll('.fpd-view-stage');
         addElemClasses(
             viewStages,
             ['fpd-hidden']
         );
-                
+
         removeElemClasses(
             viewStages.item(this.currentViewIndex),
             ['fpd-hidden']
@@ -2008,27 +2008,27 @@ export default class FancyProductDesigner extends EventTarget {
             ['fpd-hidden'],
             this.viewInstances.length <= 1 && !this.mainOptions.enableDynamicViews
         )
-        
+
 
         toggleElemClasses(
             document.body.querySelectorAll('.fpd-btn[data-action="previous-view"], .fpd-view-prev'),
             ['fpd-disabled'],
             this.currentViewIndex == 0
         )
-        
+
         toggleElemClasses(
             document.body.querySelectorAll('.fpd-btn[data-action="next-view"], .fpd-view-next'),
             ['fpd-disabled'],
             this.currentViewIndex === this.viewInstances.length - 1
         )
-                
+
         this.#toggleUndoRedoBtns();
-        this.currentViewInstance.fabricCanvas.snapToGrid = false;        
+        this.currentViewInstance.fabricCanvas.snapToGrid = false;
         this.currentViewInstance.fabricCanvas.enableRuler = this.mainOptions.rulerFixed;
-        
+
         //reset view canvas size
         this.currentViewInstance.fabricCanvas.resetSize();
-        
+
         /**
          * Gets fired as soon as a view has been selected.
          *
@@ -2036,9 +2036,9 @@ export default class FancyProductDesigner extends EventTarget {
          * @param {Event} event
          */
         fireEvent(this, 'viewSelect')
-        
+
     }
-    
+
     /**
      * Returns an array with fabricjs objects.
      *
@@ -2049,37 +2049,37 @@ export default class FancyProductDesigner extends EventTarget {
      * @returns {Array} An array containg the elements.
      */
     getElements(viewIndex, elementType='all', deselectElement=true) {
-    
+
         viewIndex = viewIndex === undefined || isNaN(viewIndex) ? -1 : viewIndex;
-                
+
         if(deselectElement) {
             this.deselectElement();
         }
-    
+
         let allElements = [];
         if(viewIndex === -1) {
-    
+
             for(var i=0; i < this.viewInstances.length; ++i) {
                 allElements = allElements.concat(this.viewInstances[i].fabricCanvas.getElements(elementType, deselectElement));
             }
-    
+
         }
         else {
-    
+
             if(this.viewInstances[viewIndex]) {
                 allElements = this.viewInstances[viewIndex].fabricCanvas.getElements(elementType, deselectElement);
             }
             else {
                 return [];
             }
-    
+
         }
-    
+
         return allElements;
-        
-    
+
+
     };
-    
+
     /**
      * Returns an array with all custom added elements.
      *
@@ -2090,26 +2090,26 @@ export default class FancyProductDesigner extends EventTarget {
      * @returns {array} An array with objects with the fabric object and the view index.
      */
     getCustomElements(type='all', viewIndex=-1, deselectElement=true) {
-        
+
         let customElements = [];
-        
+
         const elements = this.getElements(viewIndex, type, deselectElement);
         elements.forEach((element) => {
-    
+
             if(element.isCustom) {
-                
+
                 const viewIndex = this.getViewIndexByWrapper(element.canvas.wrapperEl);
-                
+
                 customElements.push({element: element, viewIndex: viewIndex});
-    
+
             }
-    
+
         });
-    
+
         return customElements;
-    
+
     }
-    
+
     /**
      * Returns an array with all fixed elements.
      *
@@ -2120,50 +2120,50 @@ export default class FancyProductDesigner extends EventTarget {
      * @returns {array} An array with objects with the fabric object and the view index.
      */
     getFixedElements(type='all', viewIndex=-1, deselectElement=true) {
-        
+
         let fixedElements = [];
-    
+
         const elements = this.getElements(viewIndex, type, deselectElement);
         elements.forEach((element) => {
-    
+
             if(element.fixed) {
-    
+
                 const viewIndex = this.getViewIndexByWrapper(element.canvas.wrapperEl);
                 fixedElements.push({element: element, viewIndex: viewIndex});
-    
+
             }
-    
+
         });
-                
+
         return fixedElements;
-    
+
     }
-    
+
     /**
      * Clears the product stage and resets everything.
      *
      * @method reset
      */
     reset() {
-    
+
         if(this.productViews === null) return;
-                
+
         this.removeEventListener('viewCreate', this.#onViewCreated)
-    
+
         this.deselectElement();
         if(this.currentViewInstance)
             this.currentViewInstance.fabricCanvas.resetZoom();
 
         this.currentViewIndex = this.currentPrice = this.singleProductPrice = this.pricingRulesPrice = 0;
         this.currentViewInstance = this.productViews = this.currentElement = null;
-    
-        this.viewInstances.forEach((viewInst) => {            
+
+        this.viewInstances.forEach((viewInst) => {
             viewInst.fabricCanvas.dispose();
         });
-        
-        this.productStage.innerHTML = '';  
+
+        this.productStage.innerHTML = '';
         this.viewInstances = [];
-    
+
         /**
          * Gets fired as soon as the stage has been cleared.
          *
@@ -2172,23 +2172,23 @@ export default class FancyProductDesigner extends EventTarget {
          */
         fireEvent(this, 'clear')
         fireEvent(this, 'priceChange')
-        
+
     };
-    
+
     /**
      * Deselects the selected element of the current showing view.
      *
      * @method deselectElement
      */
     deselectElement() {
-                     
+
         if(this.currentViewInstance && this.currentViewInstance.fabricCanvas) {
-                
+
             this.currentViewInstance.fabricCanvas.deselectElement();
             this.currentElement = null;
-        
+
         }
-        
+
     }
 
     /**
@@ -2203,7 +2203,7 @@ export default class FancyProductDesigner extends EventTarget {
 	addCustomImage(source, title, options={}, viewIndex) {
 
 		viewIndex = viewIndex === undefined ? this.currentViewIndex : viewIndex;
-        
+
 		const image = new Image;
 		image.crossOrigin = "anonymous";
     	image.src = source;
@@ -2221,7 +2221,7 @@ export default class FancyProductDesigner extends EventTarget {
 			let imageH = image.height,
 				imageW = image.width,
 				currentCustomImageParameters = this.currentViewInstance.options.customImageParameters;
-                
+
 			if(!checkImageDimensions(this, imageW, imageH)) {
 				this.toggleSpinner(false);
     			return false;
@@ -2239,7 +2239,7 @@ export default class FancyProductDesigner extends EventTarget {
 
             let imageParams = deepMerge(currentCustomImageParameters, fixedParams);
             imageParams = deepMerge(imageParams, options);
-                        
+
             this.viewInstances[viewIndex].fabricCanvas.addElement(
     			'image',
     			source,
@@ -2247,7 +2247,7 @@ export default class FancyProductDesigner extends EventTarget {
 	    		imageParams,
 	    		viewIndex
     		);
-            
+
             removeElemClasses(
                 this.viewsNav.container,
                 ['fpd-disabled']
@@ -2266,12 +2266,12 @@ export default class FancyProductDesigner extends EventTarget {
         }
 
 	}
-    
-    _addGridItemToCanvas(item, additionalOpts={}, viewIndex, isRemoteImage=true) {        
-                
+
+    _addGridItemToCanvas(item, additionalOpts={}, viewIndex, isRemoteImage=true) {
+
         if(!this.currentViewInstance) { return; }
         viewIndex = viewIndex === undefined ? this.currentViewIndex : viewIndex;
-    
+
         const options = deepMerge(
             {_addToUZ: this.currentViewInstance.currentUploadZone},
             additionalOpts
@@ -2280,7 +2280,7 @@ export default class FancyProductDesigner extends EventTarget {
         if(this.productCreated && this.mainOptions.hideDialogOnAdd && this.mainBar) {
             this.mainBar.toggleContentDisplay(false);
         }
-                
+
         this._addCanvasImage(
             item.dataset.source,
             item.dataset.title,
@@ -2289,35 +2289,35 @@ export default class FancyProductDesigner extends EventTarget {
             isRemoteImage
         );
     }
-    
+
     _addCanvasImage(source, title, options={}, viewIndex, isRemoteImage=true) {
-        
+
         if(!this.currentViewInstance) return;
         viewIndex = viewIndex === undefined ? this.currentViewIndex : viewIndex;
-                
-        //download remote image to local server (FB, Instagram, Pixabay)                
+
+        //download remote image to local server (FB, Instagram, Pixabay)
         if(FancyProductDesigner.uploadsToServer && isRemoteImage) {
-    
+
             this._downloadRemoteImage(
                 source,
                 title,
                 options
             );
-    
+
         }
         //add data uri or local image to canvas
         else {
-                        
-            this.loadingCustomImage = true;            
+
+            this.loadingCustomImage = true;
             this.addCustomImage(
                 source,
                 title ,
                 options,
                 viewIndex
             );
-    
+
         }
-    
+
     }
 
     _downloadRemoteImage(source, title, options={}, callback=null) {
@@ -2347,18 +2347,18 @@ export default class FancyProductDesigner extends EventTarget {
             this.toggleSpinner(false);
             Snackbar(errorMsg);
         }
-        
+
         postJSON({
             url: this.getFileServerURL(),
             body: formData,
             onSuccess: (data) => {
-                                
+
                 if(data && data.image_src) {
-                    
+
                     if(callback) {
 
                         callback({url: data.image_src});
-                        
+
                     }
                     else {
 
@@ -2369,59 +2369,59 @@ export default class FancyProductDesigner extends EventTarget {
                         );
 
                     }
-                    
-    
+
+
                 }
                 else {
 
                     if(callback) {
 
                         callback({error: data.image_src});
-                        
+
                     }
                     else {
 
                         _errorHandler(data.error);
 
                     }
-    
+
                 }
 
-                
+
             },
             onError: _errorHandler
         })
 
 	}
-    
 
-    addCanvasDesign(source, title, params={}) {        
-        
+
+    addCanvasDesign(source, title, params={}) {
+
         if(!this.currentViewInstance) { return; }
-    
+
         this.toggleSpinner(true, this.translator.getTranslation('misc', 'loading_image'));
-        
+
         params = deepMerge(this.currentViewInstance.options.customImageParameters, params);
-        
+
         params.isCustom = true;
         if(this.currentViewInstance.currentUploadZone) {
             params._addToUZ = this.currentViewInstance.currentUploadZone;
         }
-        
+
         if(this.productCreated && this.mainOptions.hideDialogOnAdd && this.mainBar) {
             this.mainBar.toggleContentDisplay(false);
         }
-        
+
         if(Array.isArray(params.relatedViewImages)) {
 
             params.replaceInAllViews = false;
-                        
+
             //add main design to first view
             this.viewInstances[0].fabricCanvas.addElement(
-                'image', 
-                source, 
-                title, 
-                params, 
+                'image',
+                source,
+                title,
+                params,
             );
 
             //loop through related view images
@@ -2436,32 +2436,32 @@ export default class FancyProductDesigner extends EventTarget {
                     ) {
 
                         this.viewInstances[item.viewIndex].fabricCanvas.addElement(
-                            'image', 
-                            item.url, 
-                            item.title, 
-                            {  
+                            'image',
+                            item.url,
+                            item.title,
+                            {
                                 replaceInAllViews: false,
                                 replace: params.replace
                             }
                         );
-                        
+
                 }
-                
-                
-            }) 
+
+
+            })
 
         }
         else {
 
             this.currentViewInstance.fabricCanvas.addElement(
-                'image', 
-                source, 
-                title, 
-                params, 
+                'image',
+                source,
+                title,
+                params,
             );
 
         }
-    
+
     }
 
     /**
@@ -2545,7 +2545,7 @@ export default class FancyProductDesigner extends EventTarget {
 
 		//add views
         this.viewInstances.forEach((viewInst, i) => {
-            
+
             const viewObj = {
 				title: viewInst.title,
 				thumbnail: viewInst.thumbnail,
@@ -2554,7 +2554,7 @@ export default class FancyProductDesigner extends EventTarget {
 				names_numbers: viewInst.names_numbers,
 				mask: viewInst.mask,
 				locked: viewInst.locked
-			};                        
+			};
 			if(i == 0 && this.productViews[0].hasOwnProperty('productTitle')) {
 				viewObj.productTitle = this.productViews[0].productTitle;
 			}
@@ -2599,7 +2599,7 @@ export default class FancyProductDesigner extends EventTarget {
 			targetViews = viewRange.length == 2 ? this.viewInstances.slice(viewRange[0], viewRange[1]) : this.viewInstances;
 
 		const _addCanvasImage = (viewInst) => {
-            
+
 			viewInst.toDataURL((dataURL) => {
 
 				fabric.Image.fromURL(dataURL, (img) => {
@@ -2641,7 +2641,7 @@ export default class FancyProductDesigner extends EventTarget {
 			}
 
 		};
-        
+
 		const firstView = targetViews[0];
 		printCanvas.setDimensions({width: firstView.options.stageWidth * multiplier, height: firstView.options.stageHeight * multiplier});
 		_addCanvasImage(firstView);
@@ -2657,11 +2657,11 @@ export default class FancyProductDesigner extends EventTarget {
 	 * @returns {array} An array with all views as data URLs.
 	 */
 	getViewsDataURL(callback=() => {}, options={}) {
-        
+
         options.watermarkImg = this.watermarkImg;
 
 		let dataURLs = [];
-        
+
 		this.currentViewInstance.fabricCanvas.resetZoom();
 		for(var i=0; i < this.viewInstances.length; ++i) {
 
@@ -2687,7 +2687,7 @@ export default class FancyProductDesigner extends EventTarget {
 	print() {
 
 		const _createPopupImage = (dataURLs) => {
-            
+
 			let images = [],
 				imageLoop = 0;
 
@@ -2703,12 +2703,12 @@ export default class FancyProductDesigner extends EventTarget {
 
 					//add images to popup and print popup
 					if(imageLoop == dataURLs.length) {
-                        
+
 						const popup = window.open('','','width='+images[0].width+',height='+(images[0].height*dataURLs.length)+',location=no,menubar=no,scrollbars=yes,status=no,toolbar=no');
 						popupBlockerAlert(popup, this.translator.getTranslation('misc', 'popup_blocker_alert'));
 
 						popup.document.title = "Print Image";
-						for(var j=0; j < images.length; ++j) {                            
+						for(var j=0; j < images.length; ++j) {
 							popup.document.body.append(images[j]);
 						}
 
@@ -2735,7 +2735,7 @@ export default class FancyProductDesigner extends EventTarget {
 	 * @method getUsedFonts
 	 * @returns {array} An array with objects containing the font name and optional the URL to the font.
 	 */
-	getUsedFonts() {        
+	getUsedFonts() {
 
 		let _usedFonts = [], //temp to check if already included
 			usedFonts = [];
@@ -2827,7 +2827,7 @@ export default class FancyProductDesigner extends EventTarget {
 		this.getElements(viewIndex, 'all', false).forEach((element) => {
 
 			const type = element.isColorizable();
-            
+
 			if(type) {
 
 				if(type === 'svg') {
@@ -2862,7 +2862,7 @@ export default class FancyProductDesigner extends EventTarget {
 			}
 
 		});
-        
+
 		return arrayUnique(usedColors);
 
 	}
@@ -2876,7 +2876,7 @@ export default class FancyProductDesigner extends EventTarget {
 	removeView(viewIndex=0) {
 
 		const viewInst = this.viewInstances[viewIndex];
-                
+
         viewInst.fabricCanvas.wrapperEl.remove();
         this.viewInstances.splice(viewIndex, 1);
 
@@ -2890,7 +2890,7 @@ export default class FancyProductDesigner extends EventTarget {
 		 *
 		 * @event viewRemove
 		 * @param {Event} event
-		 */        
+		 */
         fireEvent(this, 'viewRemove', {
             viewIndex: viewIndex
         })
@@ -2951,7 +2951,7 @@ export default class FancyProductDesigner extends EventTarget {
 		 *
 		 * @event getOrder
 		 * @param {Event} event
-		 */        
+		 */
         fireEvent(this, 'getOrder', {})
 
 		return this._order;
@@ -2974,16 +2974,16 @@ export default class FancyProductDesigner extends EventTarget {
         if(includeSVGData) {
 
             this.viewInstances.forEach(viewInst => {
-            
+
                 printOrderData.svg_data.push({
                     svg: viewInst.toSVG({respectPrintingBox: true}),
                     output: viewInst.options.output
                 });
-    
+
             })
 
         }
-        
+
 		this.getCustomElements('image').forEach(img => {
 
             if(!printOrderData.custom_images.includes(img.element.source))
@@ -3007,7 +3007,7 @@ export default class FancyProductDesigner extends EventTarget {
 			}
 
         })
-		
+
 	};
 
     /**
@@ -3049,7 +3049,7 @@ export default class FancyProductDesigner extends EventTarget {
             fireEvent(this, 'priceChange');
 
         }
-        
+
 		return this.currentPrice;
 
 	}
@@ -3062,7 +3062,7 @@ export default class FancyProductDesigner extends EventTarget {
 
     getFileServerURL() {
 
-        let fileServerURL = new URL(this.mainOptions.fileServerURL);      
+        let fileServerURL = new URL(this.mainOptions.fileServerURL);
 
         if(objectGet(this.viewInstances[0].options, 'industry.type') == 'engraving') {
 
