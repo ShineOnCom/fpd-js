@@ -7,7 +7,8 @@
     "dist/js"
   ],
   "scripts": {
-    "build": "webpack --progress --watch --config webpack.config.js",
+    "build": "gulp",
+    "watch": "webpack --progress --watch --config webpack.config.js",
     "start": "webpack serve --open"
   },
   "repository": {
